@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { createCategory, deleteCategory } from "./actions";
-import { Price } from "@/lib/price";
+import { Price } from "@/components/price";
 import { startOfMonth, endOfMonth } from "date-fns";
 
 export default async function CategoriesPage () {

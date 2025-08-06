@@ -1,42 +1,57 @@
-import ReportCard from "@/components/ReportCard";
-import { ArrowDownIcon, ArrowUpIcon, CurrencyDollarIcon } from "@heroicons/react/24/outline";
-import { prisma } from "../lib/prisma";
+// app/dashboard/page.tsx
+import { DashboardCard } from "@/components/dashboard/dashboard-card";
+import { Price } from "@/components/price";
+import { prisma } from "@/lib/prisma";
 
 export default async function DashboardPage () {
-  // Total income
-  const totalIncome = await prisma.transaction.aggregate( {
-    where: { type: "INCOME" },
-    _sum: { amount: true },
-  } );
+  const [ income, expense, users ] = await Promise.all( [
+    prisma.transaction.aggregate( {
+      _sum: { amount: true },
+      where: { type: "INCOME" },
+    } ),
+    prisma.transaction.aggregate( {
+      _sum: { amount: true },
+      where: { type: "EXPENSE" },
+    } ),
+    prisma.user.findMany( { include: { shares: { include: { transaction: true } } } } ),
+  ] );
 
-  // Total expense
-  const totalExpense = await prisma.transaction.aggregate( {
-    where: { type: "EXPENSE" },
-    _sum: { amount: true },
-  } );
+  const totalIncome = income._sum.amount || 0;
+  const totalExpense = expense._sum.amount || 0;
+  const net = totalIncome - totalExpense;
 
-  // Calculate net balance = income - expense
-  const balance = ( totalIncome._sum.amount || 0 ) - ( totalExpense._sum.amount || 0 );
+  const totalOwe = users.reduce( ( total, user ) => {
+    const owed = user.shares.reduce( ( sum, share ) => {
+      return share.transaction?.type === "EXPENSE" ? sum + share.amount : sum;
+    }, 0 );
+    return total + owed;
+  }, 0 );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <ReportCard
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <DashboardCard
         title="Total Income"
-        value={ totalIncome._sum.amount || 0 }
-        icon={ <ArrowDownIcon /> }
-        className="border-l-4 border-green-500"
+        amount={ <Price amount={ totalIncome } /> }
+        subtitle="From all sources"
+        badge="+"
       />
-      <ReportCard
+      <DashboardCard
         title="Total Expense"
-        value={ totalExpense._sum.amount || 0 }
-        icon={ <ArrowUpIcon /> }
-        className="border-l-4 border-red-500"
+        amount={ <Price amount={ totalExpense } /> }
+        subtitle="All spending"
+        badge="-"
       />
-      <ReportCard
+      <DashboardCard
         title="Net Balance"
-        value={ balance }
-        icon={ <CurrencyDollarIcon /> }
-        className="border-l-4 border-blue-500"
+        amount={ <Price amount={ net } /> }
+        subtitle="Income - Expense"
+        badge={ `${ ( ( net / totalIncome ) * 100 ).toFixed( 1 ) }%` }
+      />
+      <DashboardCard
+        title="Total Owed"
+        amount={ <Price amount={ totalOwe } /> }
+        subtitle="From shared expenses"
+        badge="Split"
       />
     </div>
   );

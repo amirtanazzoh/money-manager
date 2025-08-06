@@ -1,4 +1,4 @@
-import { Price } from "@/lib/price";
+import { Price } from "@/components/price";
 
 interface ReportCardProps {
     title: string;

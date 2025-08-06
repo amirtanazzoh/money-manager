@@ -11,8 +11,7 @@ const navItems = [
     { label: "Users", href: "/users" },
 ];
 
-export default function Sidebar ()
-{
+export default function Sidebar () {
     const pathname = usePathname();
 
     return (

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { Price } from "@/lib/price";
+import { Price } from "@/components/price";
 import Link from "next/link";
 import jalaali from "jalaali-js";
 

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { createUser, deleteUserById } from "./actions";
-import { Price } from "@/lib/price";
+import { Price } from "@/components/price";
 
 export default async function UsersPage () {
     const users = await prisma.user.findMany( {
