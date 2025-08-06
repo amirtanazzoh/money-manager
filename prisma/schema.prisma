@@ -35,7 +35,6 @@ model Transaction {
 model Category {
   id           Int           @id @default(autoincrement())
   name         String        @unique
-  type         CategoryType
   budget       Float?
   transactions Transaction[]
 }
@@ -53,11 +52,6 @@ model Share {
   userId        Int
   user          User        @relation(fields: [userId], references: [id])
   amount        Float
-}
-
-enum CategoryType {
-  INCOME
-  EXPENSE
 }
 
 enum TransactionType {

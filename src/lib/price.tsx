@@ -13,7 +13,7 @@ function shortenNumber ( num: number ): string {
     else if ( absNum >= 1_000 ) result = ( num / 1_000 ).toFixed( 1 ) + "K";
     else result = num.toString();
 
-    // 🔥 Remove trailing .0 if it exists
+    // Remove trailing .0 if it exists
     return result.replace( /\.0([KMB])$/, "$1" );
 }
 
@@ -31,7 +31,7 @@ export function Price ( { amount, currency = "Toman", locale = "fa-IR" }: PriceP
 
     return (
         <span className={ isNegative ? "text-red-600 font-semibold" : "" }>
-            { displayValue } { currency }
+            { amount === 0 ? "0" : `${ displayValue }  ${ currency }` }
         </span>
     );
 }

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Price } from "@/lib/price";
 import Link from "next/link";
-import { format } from "date-fns";
+import jalaali from "jalaali-js";
 
 export default async function TransactionsPage () {
     const transactions = await prisma.transaction.findMany( {
@@ -37,34 +37,39 @@ export default async function TransactionsPage () {
                     </tr>
                 </thead>
                 <tbody>
-                    { transactions.map( ( tx ) => (
-                        <tr
-                            key={ tx.id }
-                            className={ `hover:bg-gray-100 ${ tx.type === "INCOME" ? "bg-green-50" : "bg-red-50"
-                                }` }
-                        >
+                    { transactions.map( ( tx ) => {
+                        const jDate = jalaali.toJalaali( new Date( tx.date ) );
+                        const formatted = `${ jDate.jy }/${ jDate.jm.toString().padStart( 2, "0" ) }/${ jDate.jd.toString().padStart( 2, "0" ) }`;
 
-                            <td className="p-2 border">{ tx.title }</td>
-                            <td className="p-2 border">
-                                <Price amount={ tx.amount } />
-                            </td>
-                            <td className="p-2 border">{ tx.type }</td>
-                            <td className="p-2 border">{ tx.category?.name || "-" }</td>
-                            <td className="p-2 border">{ tx.account?.name || "-" }</td>
-                            <td className="p-2 border">
-                                { format( new Date( tx.date ), "yyyy-MM-dd" ) }
-                            </td>
-                            <td className="p-2 border space-x-2">
-                                <Link
-                                    href={ `/transactions/${ tx.id }/edit` }
-                                    className="text-blue-600 hover:underline"
-                                >
-                                    Edit
-                                </Link>
-                                {/* Delete button with server action will come next */ }
-                            </td>
-                        </tr>
-                    ) ) }
+                        return (
+                            <tr
+                                key={ tx.id }
+                                className={ `hover:bg-gray-100 ${ tx.type === "INCOME" ? "bg-green-50" : "bg-red-50"
+                                    }` }
+                            >
+
+                                <td className="p-2 border">{ tx.title }</td>
+                                <td className="p-2 border">
+                                    <Price amount={ tx.amount } />
+                                </td>
+                                <td className="p-2 border">{ tx.type }</td>
+                                <td className="p-2 border">{ tx.category?.name || "-" }</td>
+                                <td className="p-2 border">{ tx.account?.name || "-" }</td>
+                                <td className="p-2 border">
+                                    { formatted }
+                                </td>
+                                <td className="p-2 border space-x-2">
+                                    <Link
+                                        href={ `/transactions/${ tx.id }/edit` }
+                                        className="text-blue-600 hover:underline"
+                                    >
+                                        Edit
+                                    </Link>
+                                    {/* Delete button with server action will come next */ }
+                                </td>
+                            </tr>
+                        );
+                    } ) }
                 </tbody>
             </table>
         </div>
